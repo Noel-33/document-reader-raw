@@ -6,16 +6,6 @@ from openai import OpenAI
 OPENAI_MODELS = ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4o"]
 OLLAMA_MODELS = ["llama3.1", "mistral", "qwen2.5"]
 
-def safe_str(x) -> str:
-    try:
-        return str(x)
-    except Exception:
-        return repr(x)
-
-def safe_err_msg(e: Exception) -> str:
-    msg = safe_str(e)
-    return msg.encode("utf-8", "replace").decode("utf-8")
-
 def available_models() -> List[str]:
     models = []
 

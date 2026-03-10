@@ -3,7 +3,13 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from store import STORE, Chunk
 
-EMBED_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+_EMBED_MODEL = None
+
+def get_embed_model():
+    global _EMBED_MODEL
+    if _EMBED_MODEL is None:
+        _EMBED_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+    return _EMBED_MODEL
 
 def chunk_text(text: str, chunk_size_words: int = 800, overlap_words: int = 120) -> List[str]:
     if not text:
@@ -27,15 +33,26 @@ def index_document(doc_id: str, full_text: str) -> None:
         STORE.chunks[doc_id] = []
         return
 
-    vectors = EMBED_MODEL.encode(texts, convert_to_numpy=True, normalize_embeddings=True).astype(np.float32)
-    STORE.embeddings[doc_id] = vectors
+    embed_model = get_embed_model()
+    vectors = embed_model.encode(
+        texts,
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    ).astype(np.float32)
 
+    STORE.embeddings[doc_id] = vectors
     STORE.chunks[doc_id] = [
         Chunk(doc_id=doc_id, chunk_id=str(i), text=t) for i, t in enumerate(texts)
     ]
 
 def retrieve(doc_ids: List[str], query: str, top_k: int = 6) -> List[Tuple[str, str, float]]:
-    qv = EMBED_MODEL.encode([query], convert_to_numpy=True, normalize_embeddings=True).astype(np.float32)[0]
+    embed_model = get_embed_model()
+    qv = embed_model.encode(
+        [query],
+        convert_to_numpy=True,
+        normalize_embeddings=True
+    ).astype(np.float32)[0]
+
     results = []
 
     for doc_id in doc_ids:
