@@ -9,7 +9,7 @@ from store import STORE
 from parsers import parse_by_extension
 from rag import index_document, retrieve
 from llm_providers import available_models, call_llm
-from youtube_ingest import youtube_to_text
+
 
 app = FastAPI(title="Document Reader API")
 
@@ -38,9 +38,6 @@ MIME_MAP = {
     "md": "text/markdown",
     "rtf": "application/rtf",
 }
-
-class YouTubeRequest(BaseModel):
-    url: str
 
 class UploadResponse(BaseModel):
     doc_id: str
@@ -87,25 +84,6 @@ async def upload_files(files: List[UploadFile] = File(...)):
         index_document(doc_id, text)
         out.append(UploadResponse(doc_id=doc_id, filename=f.filename, filetype=filetype))
     return out
-@app.post("/upload/youtube", response_model=UploadResponse)
-def upload_youtube(req: YouTubeRequest):
-    text, source = youtube_to_text(req.url)
-
-    filename = f"YouTube ({source})"
-    filetype = "youtube"
-    mime_type = "text/plain"
-
-    doc_id = STORE.add_document(
-        filename=filename,
-        filetype=filetype,
-        full_text=text,
-        raw_bytes=text.encode("utf-8"),
-        mime_type=mime_type,
-    )
-
-    index_document(doc_id, text)
-
-    return UploadResponse(doc_id=doc_id, filename=filename, filetype=filetype)
 
 @app.get("/documents", response_model=List[DocListItem])
 def list_docs():

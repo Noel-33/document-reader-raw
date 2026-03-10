@@ -12,6 +12,3 @@ beautifulsoup4
 lxml
 striprtf
 markdown
-youtube-transcript-api
-faster-whisper
-yt-dlp
