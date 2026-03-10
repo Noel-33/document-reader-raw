@@ -18,8 +18,13 @@ def safe_err_msg(e: Exception) -> str:
 
 def available_models() -> List[str]:
     models = []
-    models += [f"ollama:{m}" for m in OLLAMA_MODELS]
-    models += [f"openai:{m}" for m in OPENAI_MODELS]
+
+    if os.getenv("ENABLE_OLLAMA", "false").lower() == "true":
+        models += [f"ollama:{m}" for m in OLLAMA_MODELS]
+
+    if os.getenv("OPENAI_API_KEY"):
+        models += [f"openai:{m}" for m in OPENAI_MODELS]
+
     return models
 
 def call_llm(model: str, system: str, user: str) -> str:
@@ -37,11 +42,14 @@ def call_llm(model: str, system: str, user: str) -> str:
     if provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
-            raise RuntimeError("OPENAI_API_KEY not set. Choose an ollama:* model or set OPENAI_API_KEY.")
+            raise RuntimeError("OPENAI_API_KEY not set.")
         client = OpenAI(api_key=api_key)
         resp = client.chat.completions.create(
             model=name,
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
             temperature=0.2,
         )
         return resp.choices[0].message.content

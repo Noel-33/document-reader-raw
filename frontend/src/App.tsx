@@ -266,7 +266,8 @@ export default function App() {
 <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
   {selectedDoc?.filetype === "pdf" ? (
     <div style={{ flex: 1, minHeight: 0 }}>
-      <PdfPreview url={`http://localhost:8000/documents/${selectedDoc.doc_id}/file`} />
+      <PdfPreview
+  url={`${import.meta.env.VITE_API_URL || "http://localhost:8000"}/documents/${selectedDoc.doc_id}/file`}/>
     </div>
   ) : (
     <div style={{ flex: 1, minHeight: 0, overflow: "auto", whiteSpace: "pre-wrap", color: "#0b1220" }}>

@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
@@ -9,16 +10,20 @@ from parsers import parse_by_extension
 from rag import index_document, retrieve
 from llm_providers import available_models, call_llm
 from youtube_ingest import youtube_to_text
+
 app = FastAPI(title="Document Reader API")
 
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    frontend_url,
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

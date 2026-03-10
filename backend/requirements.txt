@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+requests
+openai
+numpy
+sentence-transformers
+PyMuPDF
+python-docx
+beautifulsoup4
+lxml
+striprtf
+markdown
+youtube-transcript-api
+faster-whisper
+yt-dlp
