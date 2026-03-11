@@ -8,6 +8,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 frontend/node_modules
+backend/__pycache__/
+frontend/dist/
+firebase-debug.log
+.firebase/
+.env
+.env.*
+!.env.example
 dist
 dist-ssr
 *.local

@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -59,8 +59,8 @@ class ChatResponse(BaseModel):
     sources: List[dict]
 
 @app.get("/")
-def root():
-    return {"ok": True, "docs": "http://localhost:8000/docs"}
+def root(request: Request):
+    return {"ok": True, "docs": str(request.base_url) + "docs"}
 
 @app.get("/models")
 def get_models():
@@ -129,4 +129,3 @@ def chat(req: ChatRequest):
 
     sources = [{"doc_id": doc_id, "score": score, "snippet": txt[:260]} for doc_id, txt, score in contexts]
     return ChatResponse(answer=answer, sources=sources)
-

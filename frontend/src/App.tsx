@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Layout, Typography, Card, Upload, Button, Select, Input, Space, Tag, Divider, message
 } from "antd";
-import { UploadOutlined, SendOutlined, FileTextOutlined } from "@ant-design/icons";
+import { UploadOutlined, FileTextOutlined } from "@ant-design/icons";
 import { ConfigProvider } from "antd";
 import { theme } from "./theme";
 import { fetchModels, uploadFiles, listDocs, previewDoc, chat } from "./api";
@@ -120,7 +120,7 @@ export default function App() {
             <Card title="Upload documents">
               <Upload
                 multiple
-                beforeUpload={(file, fileList) => {
+                beforeUpload={(_, fileList) => {
                   const files = fileList.map(f => f as any as File);
                   onUpload(files);
                   return false;
