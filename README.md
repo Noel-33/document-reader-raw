@@ -71,21 +71,21 @@ Notes:
 
 ## AWS backend deployment
 
-The safest AWS path for this backend is container deployment, not App Runner's Python source build. This repo is ready for:
+This repo is now prepared specifically for ECS/Fargate deployment with:
 
-- AWS App Runner from an ECR image
-- ECS/Fargate
-- Elastic Beanstalk with Docker
+- GitHub Actions workflow: `.github/workflows/aws.yml`
+- ECS task definition template: `.aws/task-definition.json`
+- Backend container image: `backend/Dockerfile`
 
-### App Runner via ECR
+### ECS/Fargate setup
 
-1. Create an ECR repository for the backend image.
-2. Build and push `backend/Dockerfile`.
-3. Create an App Runner service from that image.
-4. Set runtime environment variables:
+1. Create an ECR repository named `document-reader-api`, or change the name in `.github/workflows/aws.yml`.
+2. Create an ECS cluster and service.
+3. Copy `.aws/task-definition.json` and replace every placeholder ARN, account ID, region, and domain.
+4. Add GitHub Actions secrets:
 
-- `FRONTEND_URL=https://YOUR_FIREBASE_DOMAIN`
-- `OPENAI_API_KEY=...` if OpenAI models should be enabled
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
 
 Example image build and push flow:
 
@@ -105,17 +105,27 @@ docker push \
   YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/document-reader-api:latest
 ```
 
-App Runner settings:
+Task definition values you must replace in `.aws/task-definition.json`:
 
-- Port: `8080`
+- `executionRoleArn`
+- `taskRoleArn`
+- ECR image account ID and region
+- `FRONTEND_URL`
+- SSM parameter ARN for `OPENAI_API_KEY`
+
+Recommended ECS service baseline:
+
+- Launch type: Fargate
+- Task size: `1 vCPU / 2 GB`
+- Container port: `8080`
 - Health check path: `/`
-- CPU/memory: start at least around `1 vCPU / 2 GB`
 
-Why this path:
+The GitHub Actions workflow will:
 
-- The backend already runs cleanly as a container.
-- It avoids source-build surprises with Python ML dependencies.
-- It gives you a cleaner path later if you move to ECS.
+- build the backend image from `backend/Dockerfile`
+- push it to ECR
+- inject the new image into `.aws/task-definition.json`
+- deploy the updated task definition to your ECS service
 
 ## 3. Deploy the frontend to Firebase Hosting
 
@@ -123,7 +133,7 @@ From the repo root:
 
 ```bash
 cd frontend
-VITE_API_URL=https://YOUR-RENDER-BACKEND.onrender.com npm run build
+VITE_API_URL=https://YOUR_BACKEND_DOMAIN npm run build
 cd ..
 firebase login
 firebase use --add
