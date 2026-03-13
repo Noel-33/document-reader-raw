@@ -15,6 +15,9 @@ firebase-debug.log
 .env
 .env.*
 !.env.example
+.terraform/
+*.tfstate
+*.tfstate.*
 dist
 dist-ssr
 *.local

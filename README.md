@@ -15,6 +15,7 @@ The backend is also prepared for AWS container deployment with:
 - `backend/Dockerfile`
 - `backend/.dockerignore`
 - port `8080` exposed for App Runner, ECS, or Elastic Beanstalk
+- `infra/aws/terraform` for ECS/Fargate + ECR + ALB + security groups
 
 ## Current production risks
 
@@ -76,6 +77,7 @@ This repo is now prepared specifically for ECS/Fargate deployment with:
 - GitHub Actions workflow: `.github/workflows/aws.yml`
 - ECS task definition template: `.aws/task-definition.json`
 - Backend container image: `backend/Dockerfile`
+- Terraform stack: `infra/aws/terraform`
 
 ### ECS/Fargate setup
 
@@ -86,6 +88,43 @@ This repo is now prepared specifically for ECS/Fargate deployment with:
 
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
+
+### Terraform path
+
+If you want AWS to create the ECS service, ALB, security groups, ECR repo, log group, and IAM roles for you, use `infra/aws/terraform`.
+
+Files:
+
+- `infra/aws/terraform/main.tf`
+- `infra/aws/terraform/variables.tf`
+- `infra/aws/terraform/outputs.tf`
+- `infra/aws/terraform/terraform.tfvars.example`
+
+Quick start:
+
+```bash
+cd infra/aws/terraform
+cp terraform.tfvars.example terraform.tfvars
+terraform init
+terraform plan
+terraform apply
+```
+
+What it creates:
+
+- ECR repository for the backend image
+- ECS cluster, task definition, and Fargate service
+- public Application Load Balancer
+- security groups
+- CloudWatch log group
+- IAM execution/task roles
+- optional HTTPS listener and Route53 alias if you provide ACM + Route53 values
+
+Important note for Firebase:
+
+- Firebase Hosting is HTTPS, so your backend also needs HTTPS in production.
+- For the Terraform stack, that means setting `certificate_arn`, `route53_zone_id`, and `backend_domain_name`.
+- The ALB health check is configured to use `/health`, which the backend now exposes.
 
 Example image build and push flow:
 
@@ -140,7 +179,7 @@ firebase use --add
 firebase deploy --only hosting
 ```
 
-This repo intentionally does not include `.firebaserc`, so you can bind it to your own Firebase project instead of a hard-coded one. If you prefer, you can also edit `frontend/.env.production` before building instead of passing `VITE_API_URL` inline.
+This repo intentionally does not include `.firebaserc`, so you can bind it to your own Firebase project instead of a hard-coded one. If you prefer, you can also edit `frontend/.env.production` before building instead of passing `VITE_API_URL` inline. On the backend side, set `FRONTEND_URLS` to your Firebase domains so CORS allows production traffic.
 
 ## Recommended upgrades
 

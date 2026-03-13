@@ -1,0 +1,21 @@
+aws_region         = "us-east-1"
+name_prefix        = "document-reader"
+vpc_id             = "vpc-xxxxxxxx"
+public_subnet_ids  = ["subnet-public-a", "subnet-public-b"]
+private_subnet_ids = ["subnet-private-a", "subnet-private-b"]
+
+frontend_urls = [
+  "https://your-app.web.app",
+  "https://your-app.firebaseapp.com",
+]
+
+task_cpu    = 1024
+task_memory = 2048
+
+# Optional, but strongly recommended for Firebase because the frontend is HTTPS.
+certificate_arn    = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+route53_zone_id    = "Z1234567890ABCDE"
+backend_domain_name = "api.example.com"
+
+# Optional. Can be a Secrets Manager ARN or SSM parameter ARN.
+openai_api_key_secret_arn = "arn:aws:secretsmanager:us-east-1:123456789012:secret:document-reader/openai-api-key"

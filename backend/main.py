@@ -13,13 +13,21 @@ from llm_providers import available_models, call_llm
 
 app = FastAPI(title="Document Reader API")
 
-frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+def parse_allowed_origins() -> List[str]:
+    frontend_urls = os.getenv("FRONTEND_URLS", "")
+    configured_urls = [origin.strip() for origin in frontend_urls.split(",") if origin.strip()]
 
-allowed_origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    frontend_url,
-]
+    legacy_frontend_url = os.getenv("FRONTEND_URL", "").strip()
+    if legacy_frontend_url:
+        configured_urls.append(legacy_frontend_url)
+
+    return [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        *configured_urls,
+    ]
+
+allowed_origins = parse_allowed_origins()
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,6 +69,10 @@ class ChatResponse(BaseModel):
 @app.get("/")
 def root(request: Request):
     return {"ok": True, "docs": str(request.base_url) + "docs"}
+
+@app.get("/health")
+def health():
+    return {"ok": True}
 
 @app.get("/models")
 def get_models():
