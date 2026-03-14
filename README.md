@@ -10,6 +10,12 @@ The most practical setup for this codebase is:
 - Firebase Hosting for the frontend
 - Render for the Python backend
 
+The simplest no-cloud setup for a small project is also supported:
+
+- Firebase Hosting for the frontend
+- your own computer for the backend
+- Cloudflare Tunnel for the public HTTPS backend URL
+
 The backend is also prepared for AWS container deployment with:
 
 - `backend/Dockerfile`
@@ -69,6 +75,54 @@ Notes:
 - Render injects `PORT`, and the backend is already compatible with that.
 - Render free/starter-style instances may cold start slowly, which will be noticeable because `sentence-transformers` is heavy.
 - Replace `YOUR_FIREBASE_DOMAIN` with your real Firebase domain after Hosting is live.
+
+## Self-host the backend on your own computer
+
+This repo also supports a home-computer or office-computer backend setup.
+
+Recommended shape:
+
+- frontend on Firebase Hosting
+- backend running locally with `python run_server.py`
+- public HTTPS URL from Cloudflare Tunnel
+
+Files added for this path:
+
+- `backend/run_server.py`
+- `backend/.env.example`
+- `deploy/self-host/README.md`
+- `deploy/self-host/cloudflared/config.yml.example`
+
+Quick start:
+
+```bash
+cd backend
+pip install -r requirements.txt
+python run_server.py
+```
+
+Then expose it publicly:
+
+```bash
+cloudflared tunnel --url http://localhost:8000
+```
+
+Then rebuild the frontend with the tunnel URL:
+
+```bash
+cd frontend
+VITE_API_URL=https://YOUR-BACKEND-DOMAIN npm run build
+cd ..
+firebase deploy --only hosting
+```
+
+Set backend CORS with:
+
+```text
+FRONTEND_URLS=https://your-app.web.app,https://your-app.firebaseapp.com
+```
+
+For the full guide, see `deploy/self-host/README.md`.
 
 ## AWS backend deployment
 
