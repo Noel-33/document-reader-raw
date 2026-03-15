@@ -24,8 +24,8 @@ def parse_allowed_origins() -> List[str]:
     return [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "index-8c1d0.web.app",
-        "index-8c1d0.firebaseapp.com"
+        "https://index-8c1d0.web.app",
+        "https://index-8c1d0.firebaseapp.com"
         *configured_urls,
     ]
 
