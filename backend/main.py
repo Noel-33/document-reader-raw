@@ -143,3 +143,8 @@ def chat(req: ChatRequest):
 
     sources = [{"doc_id": doc_id, "score": score, "snippet": txt[:260]} for doc_id, txt, score in contexts]
     return ChatResponse(answer=answer, sources=sources)
+
+@app.post("/reset")
+def reset_store():
+    STORE.documents.clear()
+    return {"ok": True}
