@@ -36,3 +36,8 @@ export async function chat(question: string, model: string, docIds: string[]) {
   const r = await api.post("/chat", { question, model, doc_ids: docIds });
   return r.data as { answer: string; sources: Array<any> };
 }
+
+export async function resetDocs() {
+  const r = await api.post("/reset");
+  return r.data;
+}
